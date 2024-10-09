@@ -25,5 +25,4 @@ flutter:
   - packages/simple_frame_app/lua/data.min.lua
   - packages/simple_frame_app/lua/code.min.lua
   - packages/simple_frame_app/lua/plain_text.min.lua
-  - packages/simple_frame_app/lua/sprite.min.lua
   - assets/frame_app.lua

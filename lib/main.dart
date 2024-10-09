@@ -32,13 +32,16 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
     if (mounted) setState(() {});
 
     try {
-      // TODO do something, e.g. send some text, wait a while, send a clear message
-      // Check the assets/frame_app.lua to find the corresponding frameside handling for these arbitrarily-chosen msgCodes
-      await frame!.sendMessage(TxPlainText(msgCode: 0x12, text: 'Hello, Frame!'));
+      await frame!.sendMessage(TxPlainText(msgCode: 0x12, text: 'Streaming Audio'));
 
+      // tell Frame to start streaming audio
+      await frame!.sendMessage(TxCode(msgCode: 0x30));
+
+      // wait a while
       await Future.delayed(const Duration(seconds: 10));
 
-      await frame!.sendMessage(TxCode(msgCode: 0x10));
+      // tell Frame to stop
+      await frame!.sendMessage(TxCode(msgCode: 0x31));
 
       currentState = ApplicationState.ready;
       if (mounted) setState(() {});

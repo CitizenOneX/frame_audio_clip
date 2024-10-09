@@ -1,19 +1,19 @@
 local data = require('data.min')
 local battery = require('battery.min')
 local code = require('code.min')
-local sprite = require('sprite.min')
 local plain_text = require('plain_text.min')
 
 -- Phone to Frame flags
--- TODO sample messages only
-USER_SPRITE = 0x20
 TEXT_MSG = 0x12
 CLEAR_MSG = 0x10
+START_AUDIO_MSG = 0x30
+STOP_AUDIO_MSG = 0x31
 
 -- register the message parsers so they are automatically called when matching data comes in
-data.parsers[USER_SPRITE] = sprite.parse_sprite
-data.parsers[CLEAR_MSG] = code.parse_code
 data.parsers[TEXT_MSG] = plain_text.parse_plain_text
+data.parsers[CLEAR_MSG] = code.parse_code
+data.parsers[START_AUDIO_MSG] = code.parse_code
+data.parsers[STOP_AUDIO_MSG] = code.parse_code
 
 
 -- Main app loop
@@ -41,15 +41,6 @@ function app_loop()
 				frame.display.show()
 			end
 
-			if (data.app_data[USER_SPRITE] ~= nil) then
-				-- show the sprite
-				local spr = data.app_data[USER_SPRITE]
-				frame.display.bitmap(1, 1, spr.width, 2^spr.bpp, 0, spr.pixel_data)
-				frame.display.show()
-
-				data.app_data[USER_SPRITE] = nil
-			end
-
 			if (data.app_data[CLEAR_MSG] ~= nil) then
 				-- clear the display
 				frame.display.text(" ", 1, 1)
@@ -57,6 +48,21 @@ function app_loop()
 
 				data.app_data[CLEAR_MSG] = nil
 			end
+
+			if (data.app_data[START_AUDIO_MSG] ~= nil) then
+				frame.display.text("Starting Audio", 1, 1)
+				frame.display.show()
+
+				data.app_data[START_AUDIO_MSG] = nil
+			end
+
+			if (data.app_data[STOP_AUDIO_MSG] ~= nil) then
+				frame.display.text("Stopping Audio", 1, 1)
+				frame.display.show()
+
+				data.app_data[STOP_AUDIO_MSG] = nil
+			end
+
 		end
 
         -- periodic battery level updates, 120s for a camera app
