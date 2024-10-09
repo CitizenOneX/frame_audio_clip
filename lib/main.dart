@@ -32,8 +32,6 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
     if (mounted) setState(() {});
 
     try {
-      await frame!.sendMessage(TxPlainText(msgCode: 0x12, text: 'Streaming Audio'));
-
       // tell Frame to start streaming audio
       await frame!.sendMessage(TxCode(msgCode: 0x30));
 
