@@ -10,7 +10,8 @@ START_AUDIO_MSG = 0x30
 STOP_AUDIO_MSG = 0x31
 
 -- Frame to Phone flags
-AUDIO_DATA_MSG = 0x33
+AUDIO_DATA_NON_FINAL_MSG = 0x05
+AUDIO_DATA_FINAL_MSG = 0x06
 
 -- register the message parsers so they are automatically called when matching data comes in
 data.parsers[TEXT_MSG] = plain_text.parse_plain_text
@@ -59,7 +60,7 @@ function app_loop()
 
 			if (data.app_data[START_AUDIO_MSG] ~= nil) then
 				audio_data = ''
-				pcall(frame.microphone.start, {sample_rate=8000, bit_depth=8})
+				pcall(frame.microphone.start, {sample_rate=8000, bit_depth=16})
 				streaming = true
 				frame.display.text("Streaming Audio", 1, 1)
 				frame.display.show()
@@ -80,28 +81,30 @@ function app_loop()
 
 		-- send any pending audio data back
 		-- Streams until STOP_AUDIO_MSG is sent from phone
-		if streaming then
-			audio_data = frame.microphone.read(mtu)
+		-- (prioritize the reading and sending about 20x compared to checking for other events e.g. STOP_AUDIO_MSG)
+		for i=1,20 do
+			if streaming then
+				audio_data = frame.microphone.read(mtu)
 
-			-- Calling frame.microphone.stop() will allow this to break the loop
-			if audio_data == nil then
-				streaming = false
+				-- Calling frame.microphone.stop() will allow this to break the loop
+				if audio_data == nil then
+					-- send an end-of-stream message back to the phone
+					pcall(frame.bluetooth.send, string.char(AUDIO_DATA_FINAL_MSG))
+					frame.sleep(0.0025)
+					streaming = false
 
-			-- If there's data to send then ...
-			elseif audio_data ~= '' then
-				-- Try to send the data as fast as possible
-				while true do
-					-- If the Bluetooth is busy, this simply tries again until it gets through
-					if (pcall(frame.bluetooth.send, string.char(AUDIO_DATA_MSG) .. audio_data)) then
-						break
-					end
+				-- send the data that was read
+				elseif audio_data ~= '' then
+					pcall(frame.bluetooth.send, string.char(AUDIO_DATA_NON_FINAL_MSG) .. audio_data)
+					frame.sleep(0.0025)
 				end
 			end
 		end
 
         -- periodic battery level updates, 120s for a camera app
         last_batt_update = battery.send_batt_if_elapsed(last_batt_update, 120)
-		frame.sleep(0.1)
+
+		if not streaming then frame.sleep(0.1) end
 	end
 end
 
