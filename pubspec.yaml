@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   flutter_blue_plus: ^1.33.4
   logging: ^1.2.0
+  raw_sound:
+    git: https://github.com/HintAzuma/flutter_raw_sound
   simple_frame_app: ^0.0.7
 
 dev_dependencies:
