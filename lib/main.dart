@@ -2,10 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:frame_audio_clip/audio_data_response.dart';
 import 'package:logging/logging.dart';
 import 'package:raw_sound/raw_sound_player.dart';
-
+import 'package:simple_frame_app/audio_data_response.dart';
 import 'package:simple_frame_app/simple_frame_app.dart';
 import 'package:simple_frame_app/tx/code.dart';
 
