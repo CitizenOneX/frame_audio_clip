@@ -38,7 +38,8 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
   @override
   void initState() {
     super.initState();
-    _player.initialize(nChannels: 1, sampleRate: 8000, pcmType: RawSoundPCMType.PCMI16).then((value) {
+    // use a small buffer to allow short clips to be played - raw_sound won't play clips smaller than bufferSize bytes
+    _player.initialize(bufferSize: 4096, nChannels: 1, sampleRate: 8000, pcmType: RawSoundPCMType.PCMI16).then((value) {
       setState(() {
         // Trigger rebuild to update UI
       });
