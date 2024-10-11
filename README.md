@@ -10,3 +10,6 @@ Very short clips (< 256ms) can be recorded but won't be played since `raw_sound`
 
 ### Screenshots
 ![Screenshot1](docs/screenshot1.png)
+
+### Architecture
+![Architecture](docs/Frame%20App%20Architecture%20-%20Audio%20Clip%20Recorder.svg)
