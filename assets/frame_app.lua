@@ -92,6 +92,7 @@ function app_loop()
 					pcall(frame.bluetooth.send, string.char(AUDIO_DATA_FINAL_MSG))
 					frame.sleep(0.0025)
 					streaming = false
+					break
 
 				-- send the data that was read
 				elseif audio_data ~= '' then
