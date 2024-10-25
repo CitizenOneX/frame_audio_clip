@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:raw_sound/raw_sound_player.dart';
-import 'package:simple_frame_app/audio_data_response.dart';
+import 'package:simple_frame_app/rx/audio.dart';
 import 'package:simple_frame_app/simple_frame_app.dart';
 import 'package:simple_frame_app/tx/code.dart';
 
@@ -61,7 +61,7 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
     try {
       // attach a handler to listen for the audio clip
       await audioClipStreamSubs?.cancel();
-      audioClipStreamSubs = audioDataResponse(frame!.dataResponse).listen((audioData) {
+      audioClipStreamSubs = RxAudio().attach(frame!.dataResponse).listen((audioData) {
         _log.info('Clip length: ${audioData.length} bytes');
         setState(() {
           _rawAudioClips.add(audioData);
