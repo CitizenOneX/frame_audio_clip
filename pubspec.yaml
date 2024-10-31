@@ -13,6 +13,7 @@ dependencies:
   logging: ^1.2.0
   raw_sound:
     git: https://github.com/HintAzuma/flutter_raw_sound
+  share_plus: ^10.1.0
   simple_frame_app: ^1.1.1
 
 dev_dependencies:

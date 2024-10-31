@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:raw_sound/raw_sound_player.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:simple_frame_app/rx/audio.dart';
 import 'package:simple_frame_app/simple_frame_app.dart';
 import 'package:simple_frame_app/tx/code.dart';
@@ -132,6 +133,56 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
     }
   }
 
+  Future<void> _shareClip(Uint8List rawAudioBytes) async {
+    // Share the raw bytes as a WAV file
+    await Share.shareXFiles(
+      [XFile.fromData(_convertToWav(rawAudioBytes), mimeType: 'audio/wav', name: 'clip.wav')],
+      fileNameOverrides: ['clip.wav'],
+    );
+  }
+
+  Uint8List _convertToWav(Uint8List rawAudio, {int sampleRate = 8000, int channels = 1, int bitDepth = 16}) {
+    // Calculate the total size of the WAV file
+    int dataSize = rawAudio.length;
+    int headerSize = 44; // Standard WAV header is 44 bytes
+    int fileSize = headerSize + dataSize;
+
+    // Create a buffer to hold the header and audio data
+    final wavData = BytesBuilder();
+
+    // RIFF header
+    wavData.add(Uint8List.fromList('RIFF'.codeUnits)); // ChunkID
+    wavData.add(_intToBytes(fileSize - 8, 4));         // ChunkSize
+    wavData.add(Uint8List.fromList('WAVE'.codeUnits)); // Format
+
+    // fmt sub-chunk
+    wavData.add(Uint8List.fromList('fmt '.codeUnits)); // Subchunk1ID
+    wavData.add(_intToBytes(16, 4));                   // Subchunk1Size (PCM)
+    wavData.add(_intToBytes(1, 2));                    // AudioFormat (1 for PCM)
+    wavData.add(_intToBytes(channels, 2));             // NumChannels
+    wavData.add(_intToBytes(sampleRate, 4));           // SampleRate
+    wavData.add(_intToBytes(sampleRate * channels * (bitDepth ~/ 8), 4)); // ByteRate
+    wavData.add(_intToBytes(channels * (bitDepth ~/ 8), 2));              // BlockAlign
+    wavData.add(_intToBytes(bitDepth, 2));             // BitsPerSample
+
+    // data sub-chunk
+    wavData.add(Uint8List.fromList('data'.codeUnits)); // Subchunk2ID
+    wavData.add(_intToBytes(dataSize, 4));             // Subchunk2Size
+    wavData.add(rawAudio);                             // Audio data
+
+    // Return the full WAV data as a Uint8List
+    return wavData.toBytes();
+  }
+
+  // Helper function to convert an integer to a byte list of given length
+  Uint8List _intToBytes(int value, int length) {
+    final result = Uint8List(length);
+    for (int i = 0; i < length; i++) {
+      result[i] = (value >> (8 * i)) & 0xFF;
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -149,19 +200,30 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
                 return Card(
                   child: ListTile(
                     title: Text('Audio Clip ${index + 1} (${(_rawAudioClips[index].length/2/8000.0).toStringAsFixed(2)}s)'),
-                    trailing: _playingIndex == index ?
-                      IconButton(
-                        icon: const Icon(Icons.stop),
-                        onPressed: () {
-                          _stopAudio();
-                        },
-                       ) :
-                      IconButton(
-                        icon: const Icon(Icons.play_arrow),
-                        onPressed: () {
-                          _playAudio(_rawAudioClips[index], index);
-                        },
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min, // Ensures the row takes up minimum space
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.share),
+                          onPressed: () {
+                            _shareClip(_rawAudioClips[index]);
+                          },
+                        ),
+                        _playingIndex == index ?
+                          IconButton(
+                            icon: const Icon(Icons.stop),
+                            onPressed: () {
+                              _stopAudio();
+                            },
+                           ) :
+                          IconButton(
+                            icon: const Icon(Icons.play_arrow),
+                            onPressed: () {
+                              _playAudio(_rawAudioClips[index], index);
+                            },
+                          ),
+                      ],
+                    ),
                   ),
                 );
               },
