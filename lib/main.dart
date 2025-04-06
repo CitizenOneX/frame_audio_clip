@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:raw_sound/raw_sound_player.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:simple_frame_app/rx/audio.dart';
+import 'package:frame_msg/rx/audio.dart';
 import 'package:simple_frame_app/simple_frame_app.dart';
-import 'package:simple_frame_app/tx/code.dart';
+import 'package:frame_msg/tx/code.dart';
 
 void main() => runApp(const MainApp());
 
@@ -71,7 +71,7 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
       });
 
       // tell Frame to start streaming audio
-      await frame!.sendMessage(TxCode(msgCode: 0x30));
+      await frame!.sendMessage(0x30, TxCode().pack());
 
     } catch (e) {
       _log.fine('Error executing application logic: $e');
@@ -91,7 +91,7 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
     });
 
     // tell Frame to stop streaming audio
-    await frame!.sendMessage(TxCode(msgCode: 0x31));
+    await frame!.sendMessage(0x31, TxCode().pack());
   }
 
   /// Play the audio from the selected recording
